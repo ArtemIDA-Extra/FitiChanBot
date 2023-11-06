@@ -45,7 +45,7 @@ namespace FitiChanBot
                     ans += $"#{targetUser.Discriminator}\n";
                 else
                     ans += "\n";
-                ans += $"   **Globalname** - *{targetUser.GlobalName}*\n";
+                if (targetUser.GlobalName != null) ans += $"   **Globalname** - *{targetUser.GlobalName}*\n";
                 ans += $"   **Account create date** - *{targetUser.CreatedAt}*\n";
                 if (targetUser.GetAvatarUrl() != null) ans += $"   **Avatar Url** - *[Link]({targetUser.GetAvatarUrl()})*\n";  // HyperLink to user avatar in Markdown markup language.
                 //ans += $"";

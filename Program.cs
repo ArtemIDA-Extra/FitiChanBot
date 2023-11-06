@@ -2,6 +2,8 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -10,6 +12,9 @@ namespace FitiChanBot {
     {
         public static Task Main(string[] args) => new Program().MainAsync();
 
+        private readonly string _settingsRelativePath = "settings.json";
+        private readonly FitiSettings? _settings;
+
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
@@ -17,13 +22,47 @@ namespace FitiChanBot {
 
         public Program()
         {
+
+            _settings = ReadJsonSettings(_settingsRelativePath);
+            if( _settings == null ) Environment.Exit(0);                        // If it was not possible to read the settings file - exit
+
             _services = CreateServices();
             _commands = _services.GetRequiredService<CommandService>();
             _client = _services.GetRequiredService<DiscordSocketClient>();
             _client.Log += Log;
             _cmd_handler = new CommandHandler(_client, _commands);
-
         }
+
+        public FitiSettings? ReadJsonSettings(string settingsRelativePath)
+        {
+            string settingsFileAbsolutePath = Directory.GetCurrentDirectory() + "\\" + settingsRelativePath;
+            FitiSettings? settings = null;
+
+            AdvConsole.WriteLine("<<<------- Reading a settings file ------->>>", 0, ConsoleColor.DarkBlue);
+            Console.WriteLine($"Relative path to file - {settingsRelativePath}");
+            Console.WriteLine($"Absolute path to file - {settingsFileAbsolutePath}");
+
+            try
+            {
+                if (!File.Exists(settingsFileAbsolutePath)) throw new Exception($"File on path <{settingsFileAbsolutePath}> does not exist. Unable to load settings.");
+
+                using (StreamReader sr = new StreamReader(settingsFileAbsolutePath))
+                {
+                    string json = sr.ReadToEnd();
+                    settings = JsonConvert.DeserializeObject<FitiSettings>(json);
+                }
+
+                if (settings == null) throw new Exception($"Deserialized FitiSettings object from file <{settingsFileAbsolutePath}> is null. (Maybe something is wrong with the file syntax or path to it?)");
+            }
+            catch(Exception ex)
+            {
+                AdvConsole.WriteLine("<<<--!!!-- ERROR --!!!-->>>", 0, ConsoleColor.Red);
+                AdvConsole.WriteLine($"{ex.Message}", 0, ConsoleColor.White);
+            }
+
+            return settings;
+        }
+
         static IServiceProvider CreateServices()
         {
             var config = new DiscordSocketConfig()
@@ -41,9 +80,11 @@ namespace FitiChanBot {
 
         public async Task MainAsync()
         {
+            AdvConsole.WriteLine("<<<------- Installing Commands ------->>>", 0, ConsoleColor.DarkBlue);
             await _cmd_handler.InstallCommandsAsync(); // Important! Need improvement!
 
-            await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("FitiToken"));
+            AdvConsole.WriteLine("<<<------- Starting ------->>>", 0, ConsoleColor.DarkBlue);
+            await _client.LoginAsync(TokenType.Bot, _settings.BotAPIKey);
             await _client.StartAsync();
 
             await Task.Delay(-1);
