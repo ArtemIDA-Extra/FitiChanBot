@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Http.Features;
+using System.Reflection.Emit;
 using System.Runtime.Serialization.Formatters;
 
 namespace FitiChanBot
@@ -189,6 +190,42 @@ namespace FitiChanBot
 
                 await ReplyAsync(embed: embed.Build());
             }
+        }
+
+        [Command("UTC")]
+        [Summary("Returns the time according to the specified UTC offset. If you don't enter anything, it will display UTC +00:00 time")]
+        [Alias("utc")]
+        public async Task TimeAsync([Summary("The UTC offset in range [-12 to +14]")] int UtcOffset = 0)
+        {
+            EmbedFieldBuilder timeField;
+            switch (UtcOffset)
+            {
+                case > 0:
+                    timeField = new EmbedFieldBuilder()
+                    {
+                        Name = $"UTC +{UtcOffset}:00",
+                        Value = $"{(DateTime.UtcNow + new TimeSpan(UtcOffset, 0, 0)).ToShortTimeString()}"
+                    };
+                    break;
+                case < 0:
+                    timeField = new EmbedFieldBuilder()
+                    {
+                        Name = $"UTC {UtcOffset}:00",
+                        Value = $"{(DateTime.UtcNow + new TimeSpan(UtcOffset, 0, 0)).ToShortTimeString()}"
+                    };
+                    break; 
+                default:
+                    timeField = new EmbedFieldBuilder()
+                    {
+                        Name = $"UTC",
+                        Value = $"{DateTime.UtcNow.ToShortTimeString()}"
+                    }; break;
+            }
+            
+            var embed = new EmbedBuilder()
+                .WithColor(Color.Blue)
+                .AddField(timeField);
+            await ReplyAsync(embed: embed.Build());
         }
 
     }
