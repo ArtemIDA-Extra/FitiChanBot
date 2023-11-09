@@ -2,6 +2,6 @@
 {
     public class FitiSettings
     {
-        public string ?BotAPIKey { get; set; }
+        public string? BotAPIKey { get; set; }
     }
 }

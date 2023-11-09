@@ -1,11 +1,7 @@
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using System;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace FitiChanBot {
     public class Program
@@ -18,19 +14,24 @@ namespace FitiChanBot {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
-        private readonly CommandHandler _cmd_handler;
+        private readonly CommandHandler _cmdHandler;
+        private readonly MessageManagerService _msgManager;                                //
+        private readonly BackgroundMonitorService _msgMonitor;                             //
 
         public Program()
         {
 
             _settings = ReadJsonSettings(_settingsRelativePath);
-            if( _settings == null ) Environment.Exit(0);                        // If it was not possible to read the settings file - exit
+            //if( _settings == null ) Environment.Exit(0);                                 // If it was not possible to read the settings file - exit
 
             _services = CreateServices();
             _commands = _services.GetRequiredService<CommandService>();
             _client = _services.GetRequiredService<DiscordSocketClient>();
             _client.Log += Log;
-            _cmd_handler = new CommandHandler(_client, _commands);
+            _cmdHandler = new CommandHandler(_client, _commands);
+
+            _msgManager = new MessageManagerService(_client);                                        //
+            _msgMonitor = new BackgroundMonitorService(_msgManager, 600, 60);                        //
         }
 
         public FitiSettings? ReadJsonSettings(string settingsRelativePath)
@@ -58,6 +59,7 @@ namespace FitiChanBot {
             {
                 AdvConsole.WriteLine("<<<--!!!-- ERROR --!!!-->>>", 0, ConsoleColor.Red);
                 AdvConsole.WriteLine($"{ex.Message}", 0, ConsoleColor.White);
+                throw;
             }
 
             return settings;
@@ -81,13 +83,17 @@ namespace FitiChanBot {
         public async Task MainAsync()
         {
             AdvConsole.WriteLine("<<<------- Installing Commands ------->>>", 0, ConsoleColor.DarkBlue);
-            await _cmd_handler.InstallCommandsAsync(); // Important! Need improvement!
+            await _cmdHandler.InstallCommandsAsync(); // Important! Need improvement!
 
-            AdvConsole.WriteLine("<<<------- Starting ------->>>", 0, ConsoleColor.DarkBlue);
+            AdvConsole.WriteLine("<<<------- Starting Client ------->>>", 0, ConsoleColor.DarkBlue);
             await _client.LoginAsync(TokenType.Bot, _settings.BotAPIKey);
             await _client.StartAsync();
 
-            await Task.Delay(-1);
+            AdvConsole.WriteLine("<<<------- Starting Monitoring ------->>>", 0, ConsoleColor.DarkBlue);
+            if (_client.LoginState == LoginState.LoggedIn)
+            {
+                await _msgMonitor.StartAsync();
+            }
         }
 
         private Task Log(LogMessage msg)

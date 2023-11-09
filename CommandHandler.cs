@@ -43,7 +43,7 @@ namespace FitiChanBot
             // created, along with the service provider for precondition checks.
             if (message.HasCharPrefix('-', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
             {
-                var result = await _commands.ExecuteAsync(  
+                var result = await _commands.ExecuteAsync(
                     context: context,
                     argPos: argPos,
                     services: null);
