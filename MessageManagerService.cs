@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using FitiChanBot.EF_Entities;
+using FitiChan.DL.Entities;
 
 namespace FitiChanBot
 {
