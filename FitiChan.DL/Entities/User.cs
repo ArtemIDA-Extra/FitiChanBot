@@ -1,6 +1,9 @@
-﻿namespace FitiChan.DL.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FitiChan.DL.Entities;
 public class User
 {
+    [Key]
     public ulong DSID { get; set; }
     public DateTime CreatedDate { get; set; }
     public string Username { get; set; }
