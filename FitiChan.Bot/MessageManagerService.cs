@@ -48,7 +48,7 @@ namespace FitiChanBot
         public void PrepareShortList(TimeSpan maxTimeToSend)
         {
             foreach (var message in Messages
-                .Where(a => a.DeliveryTime - DateTime.UtcNow >= maxTimeToSend && a.Status == MessageStatus.New))
+                .Where(a => a.DeliveryTime - DateTime.UtcNow <= maxTimeToSend && a.Status == MessageStatus.New))
             {
                 ShortMessagesQuerry.Add(message);
             }

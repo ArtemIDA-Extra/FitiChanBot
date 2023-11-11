@@ -34,8 +34,8 @@ namespace FitiChanBot {
             _dbContext = new FitiDBContext();                                                                                             //
             _dbContext.DBConnectionStr = _settings.DBConnection;                                                                          //
 
-            _msgManager = new MessageManagerService(_client);                                                                             //
-            _msgMonitor = new BackgroundMonitorService(_msgManager, new TimeSpan(0, 5, 0), new TimeSpan(0, 1, 0));                        //
+            _msgManager = new MessageManagerService(_client);                                                                               //
+            _msgMonitor = new BackgroundMonitorService(_msgManager, new TimeSpan(0, 5, 0), new TimeSpan(0, 0, 10));                         //
         }
         static IServiceProvider CreateServices()
         {
