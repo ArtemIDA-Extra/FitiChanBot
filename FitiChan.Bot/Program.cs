@@ -2,7 +2,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using FitiChan.DL;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace FitiChanBot {
@@ -23,9 +22,8 @@ namespace FitiChanBot {
 
         public Program()
         {
-
-            _settings = ReadJsonSettings(_settingsRelativePath);
-            //if( _settings == null ) Environment.Exit(0);                                 // If it was not possible to read the settings file - exit
+            AdvConsole.WriteLine("<<<------- Reading a settings file ------->>>", 0, ConsoleColor.DarkBlue);
+            _settings = FitiUtilities.ReadJsonSettings<FitiSettings>(_settingsRelativePath);
 
             _services = CreateServices();
             _commands = _services.GetRequiredService<CommandService>();
@@ -33,43 +31,12 @@ namespace FitiChanBot {
             _client.Log += Log;
             _cmdHandler = new CommandHandler(_client, _commands);
 
-            _dbContext = new FitiDBContext(_settings.DBConnection);                                  //
+            _dbContext = new FitiDBContext();                                                                                             //
+            _dbContext.DBConnectionStr = _settings.DBConnection;                                                                          //
 
-            _msgManager = new MessageManagerService(_client);                                        //
-            _msgMonitor = new BackgroundMonitorService(_msgManager, 600, 60);                        //
+            _msgManager = new MessageManagerService(_client);                                                                             //
+            _msgMonitor = new BackgroundMonitorService(_msgManager, new TimeSpan(0, 5, 0), new TimeSpan(0, 1, 0));                        //
         }
-
-        public FitiSettings? ReadJsonSettings(string settingsRelativePath)
-        {
-            string settingsFileAbsolutePath = Directory.GetCurrentDirectory() + "\\" + settingsRelativePath;
-            FitiSettings? settings = null;
-
-            AdvConsole.WriteLine("<<<------- Reading a settings file ------->>>", 0, ConsoleColor.DarkBlue);
-            Console.WriteLine($"Relative path to file - {settingsRelativePath}");
-            Console.WriteLine($"Absolute path to file - {settingsFileAbsolutePath}");
-
-            try
-            {
-                if (!File.Exists(settingsFileAbsolutePath)) throw new Exception($"File on path <{settingsFileAbsolutePath}> does not exist. Unable to load settings.");
-
-                using (StreamReader sr = new StreamReader(settingsFileAbsolutePath))
-                {
-                    string json = sr.ReadToEnd();
-                    settings = JsonConvert.DeserializeObject<FitiSettings>(json);
-                }
-
-                if (settings == null) throw new Exception($"Deserialized FitiSettings object from file <{settingsFileAbsolutePath}> is null. (Maybe something is wrong with the file syntax or path to it?)");
-            }
-            catch(Exception ex)
-            {
-                AdvConsole.WriteLine("<<<--!!!-- ERROR --!!!-->>>", 0, ConsoleColor.Red);
-                AdvConsole.WriteLine($"{ex.Message}", 0, ConsoleColor.White);
-                throw;
-            }
-
-            return settings;
-        }
-
         static IServiceProvider CreateServices()
         {
             var config = new DiscordSocketConfig()
@@ -94,10 +61,18 @@ namespace FitiChanBot {
             await _client.LoginAsync(TokenType.Bot, _settings.BotAPIKey);
             await _client.StartAsync();
 
-            AdvConsole.WriteLine("<<<------- Starting Monitoring ------->>>", 0, ConsoleColor.DarkBlue);
-            if (_client.LoginState == LoginState.LoggedIn)
+            if (!_settings.RunForMigration)
             {
-                await _msgMonitor.StartAsync();
+                AdvConsole.WriteLine("<<<------- Starting Monitoring ------->>>", 0, ConsoleColor.DarkBlue);
+                if (_client.LoginState == LoginState.LoggedIn)
+                {
+                    await _msgMonitor.StartAsync();
+                }
+            }
+            else
+            {
+                AdvConsole.WriteLine("<<<------- Creating Mogration ------->>>", 0, ConsoleColor.DarkBlue);
+                await Task.Delay(new TimeSpan(0, 0, 5));
             }
         }
 

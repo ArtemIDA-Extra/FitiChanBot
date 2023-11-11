@@ -3,15 +3,16 @@
     public class BackgroundMonitorService
     {
         public bool IsActive { get; private set; }
-        public int BigDelay { get; private set; }
-        public int SmallDelay { get; private set; }
+        public TimeSpan BigDelay { get; private set; }
+        public TimeSpan SmallDelay { get; private set; }
 
         private readonly MessageManagerService _msgManager;
         private readonly CancellationTokenSource delaysCancel;
-        public BackgroundMonitorService(MessageManagerService msgManager, int bigDelay, int shortDelay)
+        public BackgroundMonitorService(MessageManagerService msgManager, TimeSpan bigDelay, TimeSpan smallDelay)
         {
             _msgManager = msgManager;
             BigDelay = bigDelay;
+            SmallDelay = smallDelay;
             IsActive = false;
             delaysCancel = new CancellationTokenSource();
         }
@@ -20,7 +21,7 @@
         {
             while (IsActive == true)
             {
-                _msgManager.PrepareShortList(TimeSpan.FromMilliseconds(BigDelay));
+                _msgManager.PrepareShortList(BigDelay);
 
                 if (!_msgManager.IsShortMessagesListEmpty)
                     await SmallMonitoringLoop(delayCancel);

@@ -8,6 +8,7 @@ public enum MessageStatus
 public class Message
 {
     public ulong Id { get; set; }
+    public DateTime CreatedDate { get; set; }
     public ulong TargetChannelID { get; set; }
     public string Text { get; set; }
     public DateTime DeliveryTime { get; set; }
