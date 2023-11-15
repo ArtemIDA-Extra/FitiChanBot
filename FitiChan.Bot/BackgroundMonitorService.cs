@@ -8,11 +8,9 @@
 
         private readonly MessageManagerService _msgManager;
         private readonly CancellationTokenSource delaysCancel;
-        public BackgroundMonitorService(MessageManagerService msgManager, TimeSpan bigDelay, TimeSpan smallDelay)
+        public BackgroundMonitorService(MessageManagerService msgManager)
         {
             _msgManager = msgManager;
-            BigDelay = bigDelay;
-            SmallDelay = smallDelay;
             IsActive = false;
             delaysCancel = new CancellationTokenSource();
         }
@@ -41,8 +39,11 @@
             }
         }
 
-        public async Task StartAsync()
+        public async Task StartAsync(TimeSpan bigDelay, TimeSpan smallDelay)
         {
+            if (IsActive == true) throw new Exception("The monitoring service is already running. Stop it before starting it again");
+            BigDelay = bigDelay;
+            SmallDelay = smallDelay;
             IsActive = true;
             await BigMonitoringLoop(delaysCancel.Token);
         }

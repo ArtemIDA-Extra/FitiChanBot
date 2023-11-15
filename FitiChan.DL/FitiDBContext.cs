@@ -11,6 +11,11 @@ namespace FitiChan.DL
         public FitiDBContext()            // If you want to pass arguments to the constructor, forget about migrations or make a dbcontext factory.
         {
             //Database.EnsureDeleted();   // When creating the initial migration, make sure that the database is deleted.
+            //Database.EnsureCreated();
+        }
+        public FitiDBContext(IDBSetting settings)
+        {
+            //Database.EnsureDeleted();   // When creating the initial migration, make sure that the database is deleted.
             Database.EnsureCreated();
         }
 

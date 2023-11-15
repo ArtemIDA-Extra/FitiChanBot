@@ -1,8 +1,9 @@
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using FitiChanBot.Interfaces;
 using FitiChan.DL;
-using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FitiChanBot {
     public class Program
@@ -10,34 +11,22 @@ namespace FitiChanBot {
         public static Task Main(string[] args) => new Program().MainAsync();
 
         private readonly string _settingsRelativePath = "settings.json";
-        private readonly FitiSettings? _settings;
+        private readonly FitiSettings _settings;
 
         private readonly DiscordSocketClient _client;
-        private readonly CommandService _commands;
         private readonly IServiceProvider _services;
-        private readonly CommandHandler _cmdHandler;
-        private readonly FitiDBContext _dbContext;
-        private readonly MessageManagerService _msgManager;                                //
-        private readonly BackgroundMonitorService _msgMonitor;                             //
 
         public Program()
         {
-            AdvConsole.WriteLine("<<<------- Reading a settings file ------->>>", 0, ConsoleColor.DarkBlue);
+            AdvConsole.WriteLine("<<<------- Reading Settings ------->>>", 0, ConsoleColor.DarkBlue);
             _settings = FitiUtilities.ReadJsonSettings<FitiSettings>(_settingsRelativePath);
 
             _services = CreateServices();
-            _commands = _services.GetRequiredService<CommandService>();
+
             _client = _services.GetRequiredService<DiscordSocketClient>();
             _client.Log += Log;
-            _cmdHandler = new CommandHandler(_client, _commands);
-
-            _dbContext = new FitiDBContext();                                                                                             //
-            _dbContext.DBConnectionStr = _settings.DBConnection;                                                                          //
-
-            _msgManager = new MessageManagerService(_client);                                                                               //
-            _msgMonitor = new BackgroundMonitorService(_msgManager, new TimeSpan(0, 5, 0), new TimeSpan(0, 0, 10));                         //
         }
-        static IServiceProvider CreateServices()
+        private IServiceProvider CreateServices()
         {
             var config = new DiscordSocketConfig()
             {
@@ -46,16 +35,21 @@ namespace FitiChanBot {
             };
 
             var collection = new ServiceCollection()
-                .AddSingleton(new DiscordSocketClient(config))
-                .AddSingleton(new CommandService());
-
+                .AddSingleton<IFitiSettings>(_settings)
+                .AddSingleton<IDBSetting>(_settings)
+                .AddSingleton<FitiDBContext>()
+                .AddSingleton<DiscordSocketClient>(new DiscordSocketClient(config))
+                .AddSingleton<CommandService>()
+                .AddSingleton<CommandHandler>()
+                .AddSingleton<MessageManagerService>()
+                .AddSingleton<BackgroundMonitorService>();
             return collection.BuildServiceProvider();
         }
 
         public async Task MainAsync()
         {
             AdvConsole.WriteLine("<<<------- Installing Commands ------->>>", 0, ConsoleColor.DarkBlue);
-            await _cmdHandler.InstallCommandsAsync(); // Important! Need improvement!
+            await _services.GetRequiredService<CommandHandler>().InstallCommandsAsync();                
 
             AdvConsole.WriteLine("<<<------- Starting Client ------->>>", 0, ConsoleColor.DarkBlue);
             await _client.LoginAsync(TokenType.Bot, _settings.BotAPIKey);
@@ -66,7 +60,7 @@ namespace FitiChanBot {
                 AdvConsole.WriteLine("<<<------- Starting Monitoring ------->>>", 0, ConsoleColor.DarkBlue);
                 if (_client.LoginState == LoginState.LoggedIn)
                 {
-                    await _msgMonitor.StartAsync();
+                    await _services.GetRequiredService<BackgroundMonitorService>().StartAsync(new TimeSpan(0, 5, 0), new TimeSpan(0, 0, 10));
                 }
             }
             else
