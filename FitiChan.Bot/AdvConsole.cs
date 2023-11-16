@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-
-namespace FitiChanBot
+﻿namespace FitiChanBot
 {
     public static class AdvConsole
     {

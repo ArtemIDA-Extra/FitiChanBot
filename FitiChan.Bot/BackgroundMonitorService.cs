@@ -1,16 +1,18 @@
-﻿namespace FitiChanBot
+﻿using FitiChanBot.Interfaces;
+using FitiChanBot.Settings;
+
+namespace FitiChanBot
 {
     public class BackgroundMonitorService
     {
         public bool IsActive { get; private set; }
-        public TimeSpan BigDelay { get; private set; }
-        public TimeSpan SmallDelay { get; private set; }
-
         private readonly MessageManagerService _msgManager;
+        private readonly DelaySettings _delaySetting;
         private readonly CancellationTokenSource delaysCancel;
-        public BackgroundMonitorService(MessageManagerService msgManager)
+        public BackgroundMonitorService(MessageManagerService msgManager, FitiSettings fitiSettings)
         {
             _msgManager = msgManager;
+            _delaySetting = fitiSettings.DelaySettings;
             IsActive = false;
             delaysCancel = new CancellationTokenSource();
         }
@@ -19,31 +21,29 @@
         {
             while (IsActive == true)
             {
-                _msgManager.PrepareShortList(BigDelay);
+                _msgManager.PrepareShortList(_delaySetting.BigDelay);
 
                 if (!_msgManager.IsShortMessagesListEmpty)
                     await SmallMonitoringLoop(delayCancel);
 
-                try { await Task.Delay(BigDelay, delayCancel); }
+                try { await Task.Delay(_delaySetting.BigDelay, delayCancel); }
                 catch (TaskCanceledException) { break; }
             }
         }
 
         private async Task SmallMonitoringLoop(CancellationToken delayCancel)
         {
-            while(!_msgManager.IsShortMessagesListEmpty)
+            while (!_msgManager.IsShortMessagesListEmpty)
             {
                 await _msgManager.SendShortListAsync();
-                try { await Task.Delay(SmallDelay, delayCancel); }
+                try { await Task.Delay(_delaySetting.SmallDelay, delayCancel); }
                 catch (TaskCanceledException) { break; }
             }
         }
 
-        public async Task StartAsync(TimeSpan bigDelay, TimeSpan smallDelay)
+        public async Task StartAsync()
         {
             if (IsActive == true) throw new Exception("The monitoring service is already running. Stop it before starting it again");
-            BigDelay = bigDelay;
-            SmallDelay = smallDelay;
             IsActive = true;
             await BigMonitoringLoop(delaysCancel.Token);
         }

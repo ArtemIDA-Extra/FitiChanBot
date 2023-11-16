@@ -5,18 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>FitiChanBot</RootNamespace>
+    <DockerfileContext>.</DockerfileContext>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="FitiChan.DL\bin\**" />
-    <Compile Remove="FitiChan.DL\obj\**" />
-    <Content Remove="FitiChan.DL\bin\**" />
-    <Content Remove="FitiChan.DL\obj\**" />
-    <EmbeddedResource Remove="FitiChan.DL\bin\**" />
-    <EmbeddedResource Remove="FitiChan.DL\obj\**" />
-    <None Remove="FitiChan.DL\bin\**" />
-    <None Remove="FitiChan.DL\obj\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="3.12.0" />
@@ -24,10 +14,18 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FitiChan.DL\FitiChan.DL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

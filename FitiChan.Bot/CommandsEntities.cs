@@ -1,9 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.AspNetCore.Http.Features;
-using System.Reflection.Emit;
-using System.Runtime.Serialization.Formatters;
 
 namespace FitiChanBot
 {

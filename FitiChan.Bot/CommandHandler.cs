@@ -1,8 +1,5 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace FitiChanBot
 {
