@@ -4,11 +4,18 @@ using Discord.WebSocket;
 
 namespace FitiChanBot
 {
+    [Summary("*Info about commands and help utilities*")]
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
-        [Command("user")]
-        [Summary("Returns info about the user who used this command, or the user parameter, if one passed.")]
-        [Alias("info", "whois", "usr")]
+        IServiceProvider _services;
+        public InfoModule(IServiceProvider services)
+        {
+            _services = services;
+        }
+
+        [Command("User")]
+        [Summary("Returns info about the user who used this command, or the user parameter, if one passed.\n*Example: -user @Artem_IDA*")]
+        [Alias("info", "whois", "usr", "user")]
         public async Task UserInfoAsync([Summary("The (optional) user to get info from")] SocketUser user = null)
         {
             var executorUser = Context.User;                  // Explicitly get the user who called the command.
@@ -197,9 +204,9 @@ namespace FitiChanBot
             }
         }
 
-        [Command("UTC")]
-        [Summary("Returns the time according to the specified UTC offset. If you don't enter anything, it will display UTC +00:00 time")]
-        [Alias("utc")]
+        [Command("Utc")]
+        [Summary("Returns the time according to the specified UTC offset. If you don't enter anything, it will display UTC +00:00 time\n*Example: -UTC +2*")]
+        [Alias("utc", "UTC")]
         public async Task TimeAsync([Summary("The UTC offset in range [-12 to +14]")] int UtcOffset = 0)
         {
             EmbedFieldBuilder timeField;
@@ -233,10 +240,28 @@ namespace FitiChanBot
             await ReplyAsync(embed: embed.Build());
         }
 
+        [Command("Help")]
+        [Summary("Displays information about all bot commands.")]
+        [Alias("HELP, help")]
+        public async Task Help()
+        {
+            List<CommandInfo> commands = _services.GetRequiredService<CommandService>().Commands.ToList();
+            
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            foreach (CommandInfo command in commands)
+            {
+                // Get the command Summary attribute information
+                string embedFieldText = command.Summary ?? "No description available\n";
+
+                embedBuilder.AddField(command.Name, embedFieldText);
+            }
+
+            await ReplyAsync("Here's a list of commands and their description: ", false, embedBuilder.Build());
+        }
     }
 
-    [Group("ad")]
-    [Summary("*Delayed sending messages.*")]
+    [Group("Ad")]
+    [Summary("*Delayed sending messages (ADs).*")]
     [Alias("ad", "AD")]
     public class ADModule : ModuleBase<SocketCommandContext>
     {
@@ -246,9 +271,9 @@ namespace FitiChanBot
             _services = services;
         }
 
-        [Command("create")]
-        [Summary("*Create ad message. Data format *")]
-        [Alias("create", "\ncreate", "Create", "\nCreate")]
+        [Command("Create")]
+        [Summary("Create ad message. Data format - UTC+0.\n*Example: -ad create \"23/12/2023 15:56\" #main \"Hello!\"*")]
+        [Alias("create", "\ncreate", "\nCreate")]
         public async Task CreateAD([Summary("Delivery date")] string date, ISocketMessageChannel channel, [Remainder][Summary("Message")] string message)
         {
             if (!Context.IsPrivate)
@@ -265,11 +290,12 @@ namespace FitiChanBot
             else await ReplyAsync("Oops, sorry. I can't create ads in a private message :/. Try asking me about it on the server.");
         }
 
-        [Command("info")]
-        [Alias("INFO")]
+        [Command("Info")]
+        [Alias("INFO", "info")]
         public async Task Info()
         {
-            await ReplyAsync(_services.GetRequiredService<MessageManagerService>().GetDebugInfo());
+            if(Context.User.GlobalName == "Artem_IDA")
+                await ReplyAsync(_services.GetRequiredService<MessageManagerService>().GetDebugInfo());
         }
     }
 }
