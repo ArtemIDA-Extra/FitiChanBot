@@ -235,26 +235,41 @@ namespace FitiChanBot
 
     }
 
-    [Group("dsmessage")]
+    [Group("ad")]
     [Summary("*Delayed sending messages.*")]
-    [Alias("dsm", "DSM", "DSMessage")]
-    public class DSMessagesModule : ModuleBase<SocketCommandContext>
+    [Alias("ad", "AD")]
+    public class ADModule : ModuleBase<SocketCommandContext>
     {
+        IServiceProvider _services;
+        public ADModule(IServiceProvider services)
+        {
+            _services = services;
+        }
+
         [Command("create")]
-        [Summary("*Create delayed sending message.*")]
-        [Alias("\ncreate", "Create", "\nCreate")]
-        public async Task CreateDSMessage([Summary("Delivery date")] string Date, [Remainder] [Summary("Message")] string message)
+        [Summary("*Create ad message. Data format *")]
+        [Alias("create", "\ncreate", "Create", "\nCreate")]
+        public async Task CreateAD([Summary("Delivery date")] string date, ISocketMessageChannel channel, [Remainder][Summary("Message")] string message)
         {
             if (!Context.IsPrivate)
             {
-                await ReplyAsync($"Message will be delivered - **{Date}**\n" +
+                try { _services.GetRequiredService<MessageManagerService>().CreateMessage(DateTime.Parse(date), channel, message); }
+                catch { await ReplyAsync("Sorry, I can't recognize the delivery date for the message. Write the date as follows: \"06/15/2008 08:30\""); return; }
+                await ReplyAsync($"Message will be delivered - **{date} UTC+0**\n" +
                                  $"Message text:\n    *{message.Replace("\n", " ")}*\n" +
                                  $"Server(Guild): {Context.Guild.Name}\n" +
                                  $"Server ID: {Context.Guild.Id}\n" +
-                                 $"Channel: {Context.Channel.Name}\n" +
-                                 $"Channel ID: {Context.Channel.Id}\n");
+                                 $"Channel: {$"<#{channel.Id}>"}\n" +
+                                 $"Channel ID: {channel.Id}\n");
             }
             else await ReplyAsync("Oops, sorry. I can't create ads in a private message :/. Try asking me about it on the server.");
+        }
+
+        [Command("info")]
+        [Alias("INFO")]
+        public async Task Info()
+        {
+            await ReplyAsync(_services.GetRequiredService<MessageManagerService>().GetDebugInfo());
         }
     }
 }

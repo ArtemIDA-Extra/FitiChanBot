@@ -2,6 +2,7 @@
 public enum MessageStatus
 {
     New,
+    ReadyToSend,
     Delivered,
     Ignored
 }

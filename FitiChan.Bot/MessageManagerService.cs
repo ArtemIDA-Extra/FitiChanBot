@@ -1,9 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using FitiChan.DL;
 using FitiChan.DL.Entities;
+using FitiChanBot.Settings;
+using System.Security.Cryptography.X509Certificates;
 
 namespace FitiChanBot
 {
+
     public class MessageManagerService
     {
         private List<Message> Messages { get; set; } // Test!!!
@@ -26,31 +30,36 @@ namespace FitiChanBot
         }
 
         private readonly DiscordSocketClient _client;
+        private readonly FitiDBContext _db;
+        private readonly FitiSettings _settings;
 
         private bool isMessagesListEmpty;
         private bool isShortMessagesListEmpty;
 
-        public MessageManagerService(DiscordSocketClient client)
+        public MessageManagerService(DiscordSocketClient client, FitiDBContext db, FitiSettings settings)
         {
             _client = client;
+            _db = db;
+            _settings = settings;
             Messages = new List<Message>();
+            ShortMessagesQuerry = new List<Message>();
             Messages.Add(new Message        // Test!!!
             {
                 Id = 1,
                 TargetChannelID = 1171857937837334578,
-                Text = $"Test Delay-delivery message, created at [{DateTime.Now}](Local). Delivery time: [{DateTime.UtcNow + TimeSpan.FromSeconds(120)}]",
+                Text = $"Test Delay-delivery message, created at [{DateTime.UtcNow}](UTC). Delivery time: [{DateTime.UtcNow + TimeSpan.FromSeconds(120)}]\n",
                 DeliveryTime = DateTime.UtcNow + TimeSpan.FromSeconds(120),
                 Status = MessageStatus.New
             });   // Test!!!
-            ShortMessagesQuerry = new List<Message>();
         }
 
-        public void PrepareShortList(TimeSpan maxTimeToSend)
+        public void UpdateShortList(TimeSpan maxTimeToSend)
         {
             foreach (var message in Messages
                 .Where(a => a.DeliveryTime - DateTime.UtcNow <= maxTimeToSend && a.Status == MessageStatus.New))
             {
                 ShortMessagesQuerry.Add(message);
+                message.Status = MessageStatus.ReadyToSend;
             }
         }
 
@@ -77,7 +86,31 @@ namespace FitiChanBot
                     }
                 }
             }
-            foreach (var ID in HandledMessagesIDs) ShortMessagesQuerry.RemoveAll(m => m.Id == ID);
+            foreach (var ID in HandledMessagesIDs)
+            {
+                Messages.RemoveAll(m => m.Id == ID);
+                ShortMessagesQuerry.RemoveAll(m => m.Id == ID);
+            }
+        }
+
+        public string GetDebugInfo()
+        {
+            return
+                $"Messages in DB: **{_db.Messages.Count()}**\n" +
+                $"Messages in Runtime List: **{Messages.Count}**\n" +
+                $"Messages in Short Messages Querry: **{ShortMessagesQuerry.Count}**";
+        }
+
+        public void CreateMessage(DateTime deliveryTime, ISocketMessageChannel channel, string message)
+        {
+            Messages.Add(new Message
+            {
+                TargetChannelID = channel.Id,
+                Text = message,
+                DeliveryTime = deliveryTime,
+                Status = MessageStatus.New
+            });
+            UpdateShortList(_settings.MonitoringDelay);
         }
 
         public async Task SendMessage(Message message)

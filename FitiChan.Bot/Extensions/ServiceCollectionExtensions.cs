@@ -1,5 +1,5 @@
 ﻿using FitiChan.DL;
-using FitiChanBot.Interfaces;
+using FitiChanBot.Settings;
 
 namespace FitiChanBot.Extensions
 {
@@ -9,7 +9,7 @@ namespace FitiChanBot.Extensions
         {
             return serviceCollection
                 .AddSingleton(FitiUtilities.ReadJsonSettings<FitiSettings>(settingsRelativePath))
-                .AddSingleton(FitiUtilities.ReadJsonSettings<DBSetting>(settingsRelativePath));
+                .AddSingleton(FitiUtilities.ReadJsonSettings<DBSettings>(settingsRelativePath));
         }
     }
 }

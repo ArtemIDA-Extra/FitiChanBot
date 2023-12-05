@@ -1,5 +1,4 @@
-﻿using FitiChanBot.Interfaces;
-using FitiChanBot.Settings;
+﻿using FitiChanBot.Settings;
 
 namespace FitiChanBot
 {
@@ -7,45 +6,46 @@ namespace FitiChanBot
     {
         public bool IsActive { get; private set; }
         private readonly MessageManagerService _msgManager;
-        private readonly DelaySettings _delaySetting;
+        private readonly TimeSpan _delay;
         private readonly CancellationTokenSource delaysCancel;
         public BackgroundMonitorService(MessageManagerService msgManager, FitiSettings fitiSettings)
         {
             _msgManager = msgManager;
-            _delaySetting = fitiSettings.DelaySettings;
+            _delay = fitiSettings.MonitoringDelay;
             IsActive = false;
             delaysCancel = new CancellationTokenSource();
         }
 
-        private async Task BigMonitoringLoop(CancellationToken delayCancel)
+        private async Task MonitoringLoop(CancellationToken delayCancel)
         {
             while (IsActive == true)
             {
-                _msgManager.PrepareShortList(_delaySetting.BigDelay);
+                _msgManager.UpdateShortList(_delay);
 
                 if (!_msgManager.IsShortMessagesListEmpty)
-                    await SmallMonitoringLoop(delayCancel);
+                    await _msgManager.SendShortListAsync();
+                //    await SmallMonitoringLoop(delayCancel);
 
-                try { await Task.Delay(_delaySetting.BigDelay, delayCancel); }
+                try { await Task.Delay(_delay, delayCancel); }
                 catch (TaskCanceledException) { break; }
             }
         }
 
-        private async Task SmallMonitoringLoop(CancellationToken delayCancel)
-        {
-            while (!_msgManager.IsShortMessagesListEmpty)
-            {
-                await _msgManager.SendShortListAsync();
-                try { await Task.Delay(_delaySetting.SmallDelay, delayCancel); }
-                catch (TaskCanceledException) { break; }
-            }
-        }
+        //private async Task SmallMonitoringLoop(CancellationToken delayCancel)
+        //{
+        //    while (!_msgManager.IsShortMessagesListEmpty)
+        //    {
+        //        await _msgManager.SendShortListAsync();
+        //        try { await Task.Delay(_delaySetting.SmallDelay, delayCancel); }
+        //        catch (TaskCanceledException) { break; }
+        //    }
+        //}
 
         public async Task StartAsync()
         {
             if (IsActive == true) throw new Exception("The monitoring service is already running. Stop it before starting it again");
             IsActive = true;
-            await BigMonitoringLoop(delaysCancel.Token);
+            await MonitoringLoop(delaysCancel.Token);
         }
         public void Stop()
         {

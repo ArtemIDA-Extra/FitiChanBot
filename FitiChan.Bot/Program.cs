@@ -1,7 +1,7 @@
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using FitiChanBot.Interfaces;
+using FitiChanBot.Settings;
 using FitiChan.DL;
 using Microsoft.EntityFrameworkCore;
 using FitiChanBot.Extensions;
@@ -32,7 +32,7 @@ namespace FitiChanBot
         private IServiceProvider CreateServices()
         {
             var collection = new ServiceCollection()
-                .AddDbContext<FitiDBContext>(builder => builder.UseMySql(_settings.DBSetting.DBConnection, new MySqlServerVersion(new Version(8, 1, 0))), ServiceLifetime.Singleton)
+                .AddDbContext<FitiDBContext>(builder => builder.UseMySql(_settings.DBSettings.DBConnection, new MySqlServerVersion(new Version(8, 1, 0))), ServiceLifetime.Singleton)
                 .AddSingleton(new DiscordSocketConfig()
                 {
                     GatewayIntents = GatewayIntents.All,
@@ -56,7 +56,7 @@ namespace FitiChanBot
             await _client.LoginAsync(TokenType.Bot, _settings.BotAPIKey);
             await _client.StartAsync();
 
-            if (!_settings.DBSetting.RunForMigration)
+            if (!_settings.DBSettings.RunForMigration)
             {
                 AdvConsole.WriteLine("<<<------- Starting Monitoring ------->>>", 0, ConsoleColor.DarkBlue);
                 if (_client.LoginState == LoginState.LoggedIn)

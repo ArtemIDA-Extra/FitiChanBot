@@ -1,13 +1,12 @@
 ﻿using FitiChan.DL;
 using FitiChanBot.Settings;
 
-namespace FitiChanBot.Interfaces
+namespace FitiChanBot.Settings
 {
     public class FitiSettings
     {
         public string BotAPIKey { get; set; }
-        public DBSetting DBSetting { get; set; }
-
-        public DelaySettings DelaySettings { get; set; }
+        public DBSettings DBSettings { get; set; }
+        public TimeSpan MonitoringDelay { get; set; }
     }
 }

@@ -7,11 +7,13 @@ namespace FitiChanBot
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
+        private readonly IServiceProvider _services;
 
-        public CommandHandler(DiscordSocketClient client, CommandService commands)
+        public CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider services)
         {
             _commands = commands;
             _client = client;
+            _services = services;
         }
 
         public async Task InstallCommandsAsync()
@@ -21,7 +23,7 @@ namespace FitiChanBot
             //It is imperative to register all command classes in CommandService.
             //Other services can be passed in function arguments if we have builded DI.
             await _commands.AddModuleAsync<InfoModule>(null);
-            await _commands.AddModuleAsync<DSMessagesModule>(null);
+            await _commands.AddModuleAsync<ADModule>(_services);
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
@@ -43,7 +45,7 @@ namespace FitiChanBot
                 var result = await _commands.ExecuteAsync(
                     context: context,
                     argPos: argPos,
-                    services: null);
+                    services: _services);
                 if (!result.IsSuccess)
                     await context.Channel.SendMessageAsync(result.ErrorReason);
 
