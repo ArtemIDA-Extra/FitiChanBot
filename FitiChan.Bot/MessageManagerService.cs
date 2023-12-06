@@ -118,7 +118,14 @@ namespace FitiChanBot
         {
             var textChannel = _client.GetChannel(message.TargetChannelID) as IMessageChannel;
             if (textChannel == null) { throw new Exception("Channel with ID[{message.TargetChannelID}] not found. This message will be ignored."); }
-            else { await textChannel.SendMessageAsync(message.Text); }
+            else 
+            { 
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                embedBuilder
+                    .AddField("Scheduled message:", message.Text)
+                    .WithColor(Color.Blue);
+                await textChannel.SendMessageAsync("", false, embedBuilder.Build()); 
+            }
         }
     }
 }

@@ -251,7 +251,8 @@ namespace FitiChanBot
             
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
-                .WithTitle("My commands");
+                .WithTitle("My commands")
+                .WithColor(Color.Blue);
             foreach (CommandInfo command in commands)
             {
                 // Get the command Summary attribute information
