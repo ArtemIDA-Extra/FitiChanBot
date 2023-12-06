@@ -47,8 +47,8 @@ namespace FitiChanBot
             {
                 Id = 1,
                 TargetChannelID = 1171857937837334578,
-                Text = $"Test Delay-delivery message, created at [{DateTime.UtcNow}](UTC). Delivery time: [{DateTime.UtcNow + TimeSpan.FromSeconds(120)}]\n",
-                DeliveryTime = DateTime.UtcNow + TimeSpan.FromSeconds(120),
+                Text = $"Test Delay-delivery message, created at [{DateTime.UtcNow}](UTC). Delivery time: [{DateTime.UtcNow + TimeSpan.FromSeconds(60)}]\n",
+                DeliveryTime = DateTime.UtcNow + TimeSpan.FromSeconds(60),
                 Status = MessageStatus.New
             });   // Test!!!
         }
