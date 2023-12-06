@@ -103,6 +103,7 @@ namespace FitiChanBot
 
         public void CreateMessage(DateTime deliveryTime, ISocketMessageChannel channel, string message)
         {
+            if (deliveryTime < DateTime.UtcNow) throw new Exception("Messages with a past delivery date are not allowed.");
             Messages.Add(new Message
             {
                 TargetChannelID = channel.Id,

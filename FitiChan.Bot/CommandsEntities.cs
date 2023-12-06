@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using FitiChan.DL.Entities;
+using System.Reflection.Emit;
 
 namespace FitiChanBot
 {
@@ -283,13 +285,18 @@ namespace FitiChanBot
             if (!Context.IsPrivate)
             {
                 try { _services.GetRequiredService<MessageManagerService>().CreateMessage(DateTime.Parse(date), channel, message); }
-                catch { await ReplyAsync("Sorry, I can't recognize the delivery date for the message. Write the date as follows: \"06/15/2008 08:30\""); return; }
-                await ReplyAsync($"Message will be delivered - **{date} UTC+0**\n" +
-                                 $"Message text:\n    *{message.Replace("\n", " ")}*\n" +
-                                 $"Server(Guild): {Context.Guild.Name}\n" +
-                                 $"Server ID: {Context.Guild.Id}\n" +
-                                 $"Channel: {$"<#{channel.Id}>"}\n" +
-                                 $"Channel ID: {channel.Id}\n");
+                catch { await ReplyAsync("Sorry, the delivery date is incorrect or you are trying to send a message to the past. " +
+                                         "Write the date in the following format: “06/15/2008 08:30”"); return; }
+
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                embedBuilder
+                    .WithTitle("Message accepted")
+                    .AddField("Message will be delivered: ", $"**{date} UTC+0**", true)
+                    .AddField("Message text: ", message, false)
+                    .AddField("Server: ", Context.Guild.Name, true)
+                    .AddField("Channel: ", $"<#{channel.Id}>", true)
+                    .WithColor(Color.Green);
+                await ReplyAsync("", false, embedBuilder.Build());
             }
             else await ReplyAsync("Oops, sorry. I can't create ads in a private message :/. Try asking me about it on the server.");
         }
