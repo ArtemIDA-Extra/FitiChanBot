@@ -3,6 +3,8 @@
 
 name: .NET
 
+env:  ${{ secrets.FitiToken }}
+
 on:
   push:
     branches: [ "main" ]
