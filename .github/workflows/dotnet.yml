@@ -3,10 +3,10 @@
 
 name: .NET
 
-env:  ${{ secrets.FitiToken }}
+env: ${{ secrets.FitiToken }}
 
 on:
-  push:
+  push: 
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
