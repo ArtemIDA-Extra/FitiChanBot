@@ -19,7 +19,6 @@ namespace FitiChanBot
 
         private readonly string _settingsRelativePath = "appsettings.json";
         private readonly FitiSettings _settings;
-
         private readonly DiscordSocketClient _client;
         private readonly IServiceProvider _services;
 
