@@ -5,11 +5,16 @@ using FitiChanBot.Settings;
 using FitiChan.DL;
 using Microsoft.EntityFrameworkCore;
 using FitiChanBot.Extensions;
+using System.Reflection;
 
 namespace FitiChanBot
 {
     public class Program
     {
+        public class Startup
+        {
+            public void ConfigureServices(IServiceCollection services) { }
+        }
         public static Task Main(string[] args) => new Program().MainAsync();
 
         private readonly string _settingsRelativePath = "appsettings.json";
@@ -41,8 +46,8 @@ namespace FitiChanBot
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
-                .AddSingleton<MessageManagerService>()
-                .AddSingleton<BackgroundMonitorService>()
+                .AddSingleton<MessageManager>()
+                .AddSingleton<BackgroundMonitor>()
                 .AddSettings(_settingsRelativePath); // new Extension method.
             return collection.BuildServiceProvider();
         }
@@ -61,7 +66,7 @@ namespace FitiChanBot
                 AdvConsole.WriteLine("<<<------- Starting Monitoring ------->>>", 0, ConsoleColor.DarkBlue);
                 if (_client.LoginState == LoginState.LoggedIn)
                 {
-                    await _services.GetRequiredService<BackgroundMonitorService>().StartAsync();
+                    await _services.GetRequiredService<BackgroundMonitor>().StartAsync();
                 }
             }
             else

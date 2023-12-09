@@ -285,7 +285,7 @@ namespace FitiChanBot
         {
             if (!Context.IsPrivate)
             {
-                try { _services.GetRequiredService<MessageManagerService>().CreateMessage(DateTime.Parse(date), channel, message); }
+                try { _services.GetRequiredService<MessageManager>().CreateMessage(DateTime.Parse(date), channel, message); }
                 catch { await ReplyAsync("Sorry, the delivery date is incorrect or you are trying to send a message to the past. " +
                                          "Write the date in the following format: “06/15/2008 08:30”"); return; }
 
@@ -307,7 +307,7 @@ namespace FitiChanBot
         public async Task Info()
         {
             if(Context.User.GlobalName == "Artem_IDA")
-                await ReplyAsync(_services.GetRequiredService<MessageManagerService>().GetDebugInfo());
+                await ReplyAsync(_services.GetRequiredService<MessageManager>().GetDebugInfo());
         }
     }
 }
