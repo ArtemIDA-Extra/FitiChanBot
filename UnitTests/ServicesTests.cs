@@ -13,7 +13,7 @@ namespace ServicesTests
     public class ServicesCreation
     {
         private readonly string dbString = "server=localhost; user=root; password=example; database=FitiTestBD;";
-        private readonly string relativePath = "appsettings.json";
+        private readonly string relativePath = "appsettings.json"; 
         private readonly DiscordSocketConfig dsSocketConf = new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.All,
