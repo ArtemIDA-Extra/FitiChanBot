@@ -27,7 +27,7 @@ namespace FitiChanBot
 
         public static T ReadJsonSettings<T>(string settingsRelativePath) where T : new()
         {
-            string settingsFileAbsolutePath = Directory.GetCurrentDirectory() + "\\" + settingsRelativePath;
+            string settingsFileAbsolutePath = Directory.GetCurrentDirectory() + "/" + settingsRelativePath;
 
             //AdvConsole.WriteLine("<<<------- Reading a settings file ------->>>", 0, ConsoleColor.DarkBlue);
             //Console.WriteLine($"Relative path to file - {settingsRelativePath}");
