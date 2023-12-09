@@ -57,7 +57,7 @@ namespace FitiChanBot
             await _services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
 
             AdvConsole.WriteLine("<<<------- Starting Client ------->>>", 0, ConsoleColor.DarkBlue);
-            await _client.LoginAsync(TokenType.Bot, _settings.BotAPIKey);
+            await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("FitiToken"));
             await _client.StartAsync();
 
             if (!_settings.DBSettings.RunForMigration)
