@@ -1,0 +1,16 @@
+{
+  "GlobalCommands": [
+    {
+      "Name": "utc",
+      "Description": "Returns the time with UTC offset. If you don't enter anything, it will display UTC +00:00 time.",
+      "IsDMEnabled": "true"
+    }
+  ],
+  "GuildsCommands": [
+    {
+      "Name": "help",
+      "Description": "Displays information about all bot commands.",
+      "IsDMEnabled": "false"
+    }
+  ]
+}

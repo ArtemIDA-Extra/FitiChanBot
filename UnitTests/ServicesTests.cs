@@ -38,7 +38,7 @@ namespace ServicesTests
         public void FitiSettingsCreate()
         {
             //Hardcode relative path to track changes
-            FitiSettings fitiSettings = FitiUtilities.ReadJsonSettings<FitiSettings>(relativePath);
+            FitiSettings fitiSettings = FitiUtilities.ReadJsonRelative<FitiSettings>(relativePath);
             //Assert
             Assert.IsNotNull(fitiSettings);
         }
@@ -67,7 +67,7 @@ namespace ServicesTests
         public void CommandHandlerCreate()
         {
 
-            CommandHandler CMDHandler = new CommandHandler(new DiscordSocketClient(), new CommandService(), new ServiceCollection().BuildServiceProvider());
+            TextCommandsHandler CMDHandler = new TextCommandsHandler(new DiscordSocketClient(), new CommandService(), new ServiceCollection().BuildServiceProvider());
             //Assert
             Assert.IsNotNull(CMDHandler);
         }
@@ -81,7 +81,7 @@ namespace ServicesTests
             optionsBuilder.UseMySql(dbString, new MySqlServerVersion(new Version(8, 1, 0)));
             FitiDBContext db = new FitiDBContext(optionsBuilder.Options);
 
-            MessageManager MSGManager = new MessageManager(new DiscordSocketClient(dsSocketConf), db, FitiUtilities.ReadJsonSettings<FitiSettings>(relativePath));
+            MessageManager MSGManager = new MessageManager(new DiscordSocketClient(dsSocketConf), db, FitiUtilities.ReadJsonRelative<FitiSettings>(relativePath));
             //Assert
             Assert.IsNotNull(MSGManager);
         }
@@ -95,8 +95,8 @@ namespace ServicesTests
             optionsBuilder.UseMySql(dbString, new MySqlServerVersion(new Version(8, 1, 0)));
             FitiDBContext db = new FitiDBContext(optionsBuilder.Options);
 
-            BackgroundMonitor BackMonitor = new BackgroundMonitor(new MessageManager(new DiscordSocketClient(dsSocketConf), db, FitiUtilities.ReadJsonSettings<FitiSettings>(relativePath)),
-                                                                  FitiUtilities.ReadJsonSettings<FitiSettings>(relativePath));
+            BackgroundMonitor BackMonitor = new BackgroundMonitor(new MessageManager(new DiscordSocketClient(dsSocketConf), db, FitiUtilities.ReadJsonRelative<FitiSettings>(relativePath)),
+                                                                  FitiUtilities.ReadJsonRelative<FitiSettings>(relativePath));
             //Assert
             Assert.IsNotNull(BackMonitor);
         }

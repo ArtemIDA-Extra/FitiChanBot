@@ -11,13 +11,11 @@ namespace FitiChanBot
 {
     public class Program
     {
-        public class Startup
-        {
-            public void ConfigureServices(IServiceCollection services) { }
-        }
         public static Task Main(string[] args) => new Program().MainAsync();
 
         private readonly string _settingsRelativePath = "appsettings.json";
+        private readonly string _commandsRelativePath = "commands.json";
+
         private readonly FitiSettings _settings;
         private readonly DiscordSocketClient _client;
         private readonly IServiceProvider _services;
@@ -25,7 +23,7 @@ namespace FitiChanBot
         public Program()
         {
             AdvConsole.WriteLine("<<<------- Reading Settings ------->>>", 0, ConsoleColor.DarkBlue);
-            _settings = FitiUtilities.ReadJsonSettings<FitiSettings>(_settingsRelativePath);
+            _settings = FitiUtilities.ReadJsonRelative<FitiSettings>(_settingsRelativePath);
 
             _services = CreateServices();
 
@@ -44,20 +42,42 @@ namespace FitiChanBot
                 }) // add socket configs to DI
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandler>()
+                .AddSingleton<TextCommandsHandler>()
+                .AddSingleton<SlashCommandsHandler>(s => new SlashCommandsHandler(
+                _commandsRelativePath,
+                s.GetRequiredService<FitiSettings>(),
+                s.GetRequiredService<DiscordSocketClient>(),
+                s.GetRequiredService<CommandService>(),
+                s))
                 .AddSingleton<MessageManager>()
                 .AddSingleton<BackgroundMonitor>()
                 .AddSettings(_settingsRelativePath); // new Extension method.
             return collection.BuildServiceProvider();
         }
 
+        private async Task InitCommands()
+        {
+            var CMDService = _services.GetRequiredService<CommandService>();
+
+            await CMDService.AddModuleAsync<InfoModule>(null);
+            await CMDService.AddModuleAsync<ADModule>(_services);
+        }
+
         public async Task MainAsync()
         {
-            AdvConsole.WriteLine("<<<------- Installing Commands ------->>>", 0, ConsoleColor.DarkBlue);
-            await _services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
+            AdvConsole.WriteLine("<<<------- Init Commands Entities ------->>>", 0, ConsoleColor.DarkBlue);
+            await InitCommands();
+
+            AdvConsole.WriteLine("<<<------- Setup Text CMD-Hanbler ------->>>", 0, ConsoleColor.DarkBlue);
+            _services.GetRequiredService<TextCommandsHandler>().SetupCommands();
+
+            AdvConsole.WriteLine("<<<------- Setup Slash CMD-Hanbler ------->>>", 0, ConsoleColor.DarkBlue);
+            _services.GetRequiredService<SlashCommandsHandler>().SetupCommands();
+
+            AdvConsole.WriteLine("<<<------- Loggin ------->>>", 0, ConsoleColor.DarkBlue);
+            await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("FitiToken"));
 
             AdvConsole.WriteLine("<<<------- Starting Client ------->>>", 0, ConsoleColor.DarkBlue);
-            await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("FitiToken"));
             await _client.StartAsync();
 
             if (!_settings.DBSettings.RunForMigration)

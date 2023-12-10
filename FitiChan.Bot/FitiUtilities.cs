@@ -25,9 +25,9 @@ namespace FitiChanBot
         }
 
 
-        public static T ReadJsonSettings<T>(string settingsRelativePath) where T : new()
+        public static T ReadJsonRelative<T>(string relativePath) where T : new()
         {
-            string settingsFileAbsolutePath = Directory.GetCurrentDirectory() + "/" + settingsRelativePath;
+            string jsonFileAbsolutePath = Directory.GetCurrentDirectory() + "/" + relativePath;
 
             //AdvConsole.WriteLine("<<<------- Reading a settings file ------->>>", 0, ConsoleColor.DarkBlue);
             //Console.WriteLine($"Relative path to file - {settingsRelativePath}");
@@ -37,17 +37,17 @@ namespace FitiChanBot
 
             try
             {
-                if (!File.Exists(settingsFileAbsolutePath)) throw new Exception($"File on path <{settingsFileAbsolutePath}> does not exist. Unable to load settings.");
+                if (!File.Exists(jsonFileAbsolutePath)) throw new Exception($"File on path <{jsonFileAbsolutePath}> does not exist. Unable to load settings.");
 
-                using (StreamReader sr = new StreamReader(settingsFileAbsolutePath))
+                using (StreamReader sr = new StreamReader(jsonFileAbsolutePath))
                 {
                     string json = sr.ReadToEnd();
                     settings = JsonConvert.DeserializeObject<T>(json);
                 }
 
-                if (settings == null) throw new Exception($"Deserialized {typeof(T)} object from file <{settingsFileAbsolutePath}> is null. (Maybe something is wrong with the file syntax or path to it?)");
+                if (settings == null) throw new Exception($"Deserialized {typeof(T)} object from file <{jsonFileAbsolutePath}> is null. (Maybe something is wrong with the file syntax or path to it?)");
             }
-            catch (Exception ex)
+            catch
             {
                 //AdvConsole.WriteLine("<<<--!!!-- ERROR --!!!-->>>", 0, ConsoleColor.Red);
                 //AdvConsole.WriteLine($"{ex.Message}", 0, ConsoleColor.White);

@@ -8,8 +8,8 @@ namespace FitiChanBot.Extensions
         public static IServiceCollection AddSettings(this IServiceCollection serviceCollection, string settingsRelativePath)
         {
             return serviceCollection
-                .AddSingleton(FitiUtilities.ReadJsonSettings<FitiSettings>(settingsRelativePath))
-                .AddSingleton(FitiUtilities.ReadJsonSettings<DBSettings>(settingsRelativePath));
+                .AddSingleton(FitiUtilities.ReadJsonRelative<FitiSettings>(settingsRelativePath))
+                .AddSingleton(FitiUtilities.ReadJsonRelative<DBSettings>(settingsRelativePath));
         }
     }
 }

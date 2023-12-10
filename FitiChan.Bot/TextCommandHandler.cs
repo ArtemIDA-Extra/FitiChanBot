@@ -3,27 +3,22 @@ using Discord.WebSocket;
 
 namespace FitiChanBot
 {
-    public class CommandHandler
+    public class TextCommandsHandler
     {
         private readonly DiscordSocketClient _client;
-        private readonly CommandService _commands;
+        private readonly CommandService _cmdServices;
         private readonly IServiceProvider _services;
 
-        public CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider services)
+        public TextCommandsHandler(DiscordSocketClient client, CommandService cmdService, IServiceProvider services)
         {
-            _commands = commands;
+            _cmdServices = cmdService;
             _client = client;
             _services = services;
         }
 
-        public async Task InstallCommandsAsync()
+        public void SetupCommands()
         {
             _client.MessageReceived += HandleCommandAsync;
-
-            //It is imperative to register all command classes in CommandService.
-            //Other services can be passed in function arguments if we have builded DI.
-            await _commands.AddModuleAsync<InfoModule>(null);
-            await _commands.AddModuleAsync<ADModule>(_services);
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
@@ -42,7 +37,7 @@ namespace FitiChanBot
             // created, along with the service provider for precondition checks.
             if (message.HasCharPrefix('-', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
             {
-                var result = await _commands.ExecuteAsync(
+                var result = await _cmdServices.ExecuteAsync(
                     context: context,
                     argPos: argPos,
                     services: _services);
