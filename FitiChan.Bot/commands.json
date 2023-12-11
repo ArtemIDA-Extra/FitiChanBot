@@ -3,14 +3,65 @@
     {
       "Name": "utc",
       "Description": "Returns the time with UTC offset. If you don't enter anything, it will display UTC +00:00 time.",
-      "IsDMEnabled": "true"
+      "IsDMEnabled": true,
+      "Options": [
+        {
+          "Name": "offset",
+          "Description": "The UTC offset in range [-12 to +14]",
+          "Type": "Integer",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "Name": "user",
+      "Description": "Returns info about you.",
+      "IsDMEnabled": true
     }
   ],
   "GuildsCommands": [
     {
       "Name": "help",
       "Description": "Displays information about all bot commands.",
-      "IsDMEnabled": "false"
+      "IsDMEnabled": false
+    },
+    {
+      "Name": "utc",
+      "Description": "Returns the time with UTC offset. If you don't enter anything, it will display UTC +00:00 time.",
+      "IsDMEnabled": false,
+      "Options": [
+        {
+          "Name": "offset",
+          "Description": "The UTC offset in range [-12 to +14]",
+          "Type": "Integer",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "Name": "user",
+      "Description": "Returns info about the user who used this command",
+      "IsDMEnabled": false,
+      "Options": [
+        {
+          "Name": "user",
+          "Description": "The user to get info from",
+          "Type": "User",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "Name": "sm",
+      "Description": "Scheduled message (SM).",
+      "IsDMEnabled": false,
+      "Options": [
+        {
+          "Name": "create",
+          "Description": "Create SM message.",
+          "Type": "SubCommand"
+        }
+      ]
     }
   ]
 }

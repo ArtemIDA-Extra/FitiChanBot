@@ -10,21 +10,18 @@ namespace FitiChanBot
     {
         private readonly FitiSettings _settings;
         private readonly DiscordSocketClient _client;
-        private readonly CommandService _cmdService;
+        private readonly CommandsKeeper _cmdKeeper;
         private readonly IServiceProvider _services;
-
-        private readonly string _pathToJsonCommand;
 
         private SlashCommandBuilders _slashCommandBuilders;
         
-        public SlashCommandsHandler(string pathToJsonCommands, FitiSettings settings, DiscordSocketClient client, CommandService cmdService, IServiceProvider services)
+        public SlashCommandsHandler(SlashCommandBuilders commands, FitiSettings settings, DiscordSocketClient client, CommandsKeeper cmdKeeper, IServiceProvider services)
         {
             _settings = settings;
             _client = client;
-            _cmdService = cmdService;
+            _cmdKeeper = cmdKeeper;
             _services = services;
-
-            _pathToJsonCommand = pathToJsonCommands;
+            _slashCommandBuilders = commands;
         }
 
         public void SetupCommands()
@@ -32,14 +29,11 @@ namespace FitiChanBot
             _client.Ready += UpdateCommandsOnOldGuilds;
             _client.JoinedGuild += InitCommandsOnNewGuild;
             _client.SlashCommandExecuted += HandleCommandAsync;
-
-            try { _slashCommandBuilders = FitiUtilities.ReadJsonRelative<SlashCommandBuilders>(_pathToJsonCommand); }
-            catch { throw; }
         }
 
         private async Task HandleCommandAsync(SocketSlashCommand cmd)
         {
-            throw new NotImplementedException();
+            await _cmdKeeper.ExecuteAsync(cmd);
         }
 
         private async Task UpdateCommandsOnOldGuilds()

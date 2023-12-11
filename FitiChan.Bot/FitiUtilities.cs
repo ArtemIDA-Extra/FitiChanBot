@@ -33,7 +33,7 @@ namespace FitiChanBot
             //Console.WriteLine($"Relative path to file - {settingsRelativePath}");
             //Console.WriteLine($"Absolute path to file - {settingsFileAbsolutePath}");
 
-            T? settings = new T();
+            T? jsonCSharpObject = new T();
 
             try
             {
@@ -42,10 +42,10 @@ namespace FitiChanBot
                 using (StreamReader sr = new StreamReader(jsonFileAbsolutePath))
                 {
                     string json = sr.ReadToEnd();
-                    settings = JsonConvert.DeserializeObject<T>(json);
+                    jsonCSharpObject = JsonConvert.DeserializeObject<T>(json);
                 }
 
-                if (settings == null) throw new Exception($"Deserialized {typeof(T)} object from file <{jsonFileAbsolutePath}> is null. (Maybe something is wrong with the file syntax or path to it?)");
+                if (jsonCSharpObject == null) throw new Exception($"Deserialized {typeof(T)} object from file <{jsonFileAbsolutePath}> is null. (Maybe something is wrong with the file syntax or path to it?)");
             }
             catch
             {
@@ -54,7 +54,7 @@ namespace FitiChanBot
                 throw;
             }
 
-            return settings;
+            return jsonCSharpObject;
         }
     }
 }

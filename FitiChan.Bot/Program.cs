@@ -22,11 +22,8 @@ namespace FitiChanBot
 
         public Program()
         {
-            AdvConsole.WriteLine("<<<------- Reading Settings ------->>>", 0, ConsoleColor.DarkBlue);
-            _settings = FitiUtilities.ReadJsonRelative<FitiSettings>(_settingsRelativePath);
-
             _services = CreateServices();
-
+            _settings = _services.GetRequiredService<FitiSettings>();
             _client = _services.GetRequiredService<DiscordSocketClient>();
             _client.Log += Log;
         }
@@ -42,16 +39,12 @@ namespace FitiChanBot
                 }) // add socket configs to DI
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
+                .AddSingleton<CommandsKeeper>()
                 .AddSingleton<TextCommandsHandler>()
-                .AddSingleton<SlashCommandsHandler>(s => new SlashCommandsHandler(
-                _commandsRelativePath,
-                s.GetRequiredService<FitiSettings>(),
-                s.GetRequiredService<DiscordSocketClient>(),
-                s.GetRequiredService<CommandService>(),
-                s))
+                .AddSingleton<SlashCommandsHandler>()
                 .AddSingleton<MessageManager>()
                 .AddSingleton<BackgroundMonitor>()
-                .AddSettings(_settingsRelativePath); // new Extension method.
+                .AddJsons(_settingsRelativePath, _commandsRelativePath); // Extension method.
             return collection.BuildServiceProvider();
         }
 
