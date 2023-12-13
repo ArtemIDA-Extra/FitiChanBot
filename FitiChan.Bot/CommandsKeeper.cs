@@ -10,6 +10,7 @@ namespace FitiChanBot
         public CommandsKeeper(SlashCommandBuilders commands)
         {
             _jsonCommands = commands;
+            
         }
 
         public async Task ExecuteAsync(SocketSlashCommand command)
